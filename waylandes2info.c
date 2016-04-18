@@ -26,7 +26,6 @@
  * List OpenGL ES extensions.
  * Print ES 1 or ES 2 extensions depending on the executable name.
  */
-#define WL_DISPLAY_READABLE 0x01
 #define GL_GLEXT_PROTOTYPES
 
 #include <assert.h>
@@ -43,6 +42,7 @@
 
 struct display {
 	struct wl_display *display;
+	struct wl_registry *registry;
 	struct wl_compositor *compositor;
 	struct {
 		EGLDisplay dpy;
@@ -225,14 +225,14 @@ static void destroy_egl_surface(struct window *w)
 }
 
 static void
-display_handle_global(struct wl_display *display, uint32_t id,
-		      const char *interface, uint32_t version, void *data)
+display_handle_global(void *data, struct wl_registry *registry, uint32_t id,
+		      const char *interface, uint32_t version)
 {
 	struct display *d = data;
 
 	if (strcmp(interface, "wl_compositor") == 0) {
 		d->compositor =
-			wl_display_bind(display, id, &wl_compositor_interface);
+			wl_registry_bind(registry, id, &wl_compositor_interface, 1);
 	}
 }
 
@@ -245,6 +245,12 @@ event_mask_update(uint32_t mask, void *data)
 
 	return 0;
 }
+
+
+static const struct wl_registry_listener registry_listener = {
+       display_handle_global
+};
+
 
 int
 main(int argc, char *argv[])
@@ -264,11 +270,15 @@ main(int argc, char *argv[])
 	}
 	window.display = &display;
 
-	wl_display_add_global_listener(display.display,
-				       display_handle_global, &display);
+	display.registry = wl_display_get_registry(display.display);
+
+	wl_registry_add_listener(display.registry,
+				       &registry_listener, &display);
+
+
 
 	wl_display_get_fd(display.display);//, event_mask_update, &display);
-	wl_display_iterate(display.display, WL_DISPLAY_READABLE);
+	wl_display_dispatch(display.display);
 
 	init_egl(&display, es_ver);
 	init_egl_surface(&window);
@@ -279,9 +289,9 @@ main(int argc, char *argv[])
 
 	eglDestroyContext(display.egl.dpy, display.egl.ctx);
 	eglTerminate(display.egl.dpy);
-
 	wl_compositor_destroy(display.compositor);
-	wl_display_destroy(display.display);
+
+	// segfaults? wl_display_destroy(display.display);
 
 	return 0;
 }
