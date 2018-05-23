@@ -2,6 +2,7 @@
  * Copyright (C) 2008  Tunsgten Graphics,Inc.   All Rights Reserved.
  * Copyright (C) 2011  Benjamin Franzke
  * Copyright (C) 2011  Collabora, Ltd.
+ * Copyright (C) 2016  Igalia S.L.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
