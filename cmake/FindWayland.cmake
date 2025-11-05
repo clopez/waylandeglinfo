@@ -28,8 +28,9 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-find_package(PkgConfig)
-pkg_check_modules(WAYLAND wayland-client wayland-server)
+find_package(PkgConfig QUIET)
+pkg_check_modules(WAYLAND wayland-client wayland-server wayland-egl)
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(WAYLAND DEFAULT_MSG WAYLAND_LIBRARIES)
+find_package_handle_standard_args(Wayland REQUIRED_VARS WAYLAND_LIBRARIES
+                                  FOUND_VAR WAYLAND_FOUND)
